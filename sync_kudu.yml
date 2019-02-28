@@ -1,0 +1,58 @@
+################################################################
+#                                                              #
+#         Playbook Ansible - Restart NTP                       #
+#         Criado por: Anselmo Borges                           #
+#         Data de criação: 04.12.2018                          #
+#         Ultima atualização: 28.02.2019                       #
+#                                                              #
+################################################################                                    
+
+- name: "Playbook de restart do NTP"
+  hosts: ndevs
+  tasks:
+    - name: "Copiando o arquivo de configuração do NTP"
+      copy: 
+        src: ntp.conf
+        dest: /etc/ntp.conf
+      become: yes
+      become_method: sudo
+      become_user: root
+    
+    - name: "Copiando o arquivo de configuração do Chronyc para todos os nodes"
+      copy:
+        src: chrony.conf
+        dest: /etc/chrony.conf
+      become: yes
+      become_method: sudo
+      become_user: root
+
+    - name: "Reiniciando o NTP nos nodes do Cluster"
+      service:
+        name: ntpd
+        state: restarted
+      become: yes
+      become_method: sudo
+      become_user: root
+
+    - name: "Habilitando o daemon do Chronyc"
+      service:
+        name: chronyd
+        enabled: yes
+      become: yes
+      become_method: sudo
+      become_user: root
+
+    - name: "Iniciando o daemon do Chronyc"
+      service:
+        name: chronyd
+        state: restarted
+      become: yes
+      become_method: sudo
+      become_user: root
+
+    - name: "Syncronizando o horario do NTP"
+      command: ntpdate 10.198.233.3
+      become: yes
+      become_method: sudo
+      become_user: root
+
